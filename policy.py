@@ -78,7 +78,9 @@ if __name__ == "__main__":
     p = Policy()
     print("lstm")
     print(p.lstm)
-    # e = Episode(p, "0000")
-    # x = p(e.generate())
-    # print(x.numpy())
+    e = Episode(p, "0000",find_target_proba = 0.3, train=True)
+    g = e.generate()
+    print(g)
+    x = p(g)
+    print(x)
 

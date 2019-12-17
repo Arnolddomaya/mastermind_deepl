@@ -1,5 +1,6 @@
 import config
 import numpy as np
+import random
 
 class Episode:
 
@@ -7,12 +8,14 @@ class Episode:
     start_feedback = config.max_feedback
     triangle_numbers = [0, 1, 3, 6, 10]
 
-    def __init__(self, policy, secret):
+    def __init__(self, policy, secret, find_target_proba = 0, train = False):
         self.policy = policy
         if isinstance(secret, int):
             secret = self._number_from_index(secret)
         self.secret = secret
         self.secret_sorted = sorted(secret)
+        self.find_target_proba = find_target_proba
+        self.isTrain = train
 
     @staticmethod
     def _index_from_number(number):
@@ -20,11 +23,12 @@ class Episode:
         Convert a 4-digit guess to an index between 0 and 6**4 
         """
         assert(len(number) <= 4)
-        assert(set(number) <= set(map(str, range(5))))
+        assert(set(number) <= set(map(str, range(6))))
         return int(number, base=6)
 
     @staticmethod
     def _number_from_index(index):
+        #print(f"int secret = {index}")
         assert(0 <= index < config.max_guesses)
         digits = []
         while index > 0:
@@ -73,13 +77,18 @@ class Episode:
         episode = [(self.start_guess, self.start_feedback)]
 
         for _ in range(config.max_episode_length):
-            guess = self._select_next_action(self.policy(episode))
-            feedback = self._index_from_feedback(
-                self._feedback_from_guess(
-                    self._number_from_index(guess)))
+            proba = random.uniform(0, 1)
+            if (self.isTrain and  proba <= self.find_target_proba):
+                guess = self._index_from_number(str(self.secret))
+                feedback = 14
+            else:
+                guess = self._select_next_action(self.policy(episode))
+                feedback = self._index_from_feedback(
+                    self._feedback_from_guess(
+                        self._number_from_index(guess)))
             episode.append((guess, feedback))
+            
             if feedback == 14:
                 break  # this corresponds to a correct guess
 
         return episode
-

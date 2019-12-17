@@ -15,15 +15,17 @@ def train(num_episodes=1000,
           save_every=100, 
           checkpoint_dir="checkpoints",
           tensorboard_dir="tensorboard",
-          tboard_every=10):
+          tboard_every=10,
+          find_target_prop = 0
+          ):
     pol = Policy()
     writer = tf.contrib.summary.create_file_writer(tensorboard_dir)
     for j in range(1, num_episodes+1):
         random_secret = random.randint(0, config.max_guesses - 1)
-        e = Episode(pol, random_secret)
+        e = Episode(pol, random_secret, find_target_prop, True)
         history = e.generate()
 
-        print("Episode length: {}".format(len(history)))
+        print("Episode:{}, length: {}".format(j, len(history)))
 
         G = -1 
 
@@ -68,28 +70,35 @@ def train(num_episodes=1000,
                     tf.contrib.summary.scalar('total_return', 
                                               tf.convert_to_tensor([G]), 
                                               step=j)
-    print("print of pol")
-    print(pol)
     return pol
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Train the mastermind model "
-                                     "Using the REINFORCE policy gradient "
-                                     "method")
-    parser.add_argument("--num_episodes", 
-                        help="Number of episodes to use for training",
-                        type=int, default=1000)
-    parser.add_argument("--save_every", type=int, default=100,
-                        help="Checkpoint every N episodes")
-    parser.add_argument("--checkpoint_dir", help="Checkpoint directory",
-                        default="checkpoints")
-    parser.add_argument("--board_dir", help="Tensorboard directory",
-                        default="tensorboard")
-    parser.add_argument("--tboard_every", type=int, default=10,
-                        help="Write to tensorboard every N episodes")
-    args = parser.parse_args()
+    # parser = argparse.ArgumentParser(description="Train the mastermind model "
+    #                                  "Using the REINFORCE policy gradient "
+    #                                  "method")
+    # parser.add_argument("--num_episodes", 
+    #                     help="Number of episodes to use for training",
+    #                     type=int, default=1000)
+    # parser.add_argument("--find_target_proba", 
+    #                     help="proba of getting the right target in the trainning",
+    #                     type=float, default=0)                    
+    # parser.add_argument("--save_every", type=int, default=100,
+    #                     help="Checkpoint every N episodes")
+    # parser.add_argument("--checkpoint_dir", help="Checkpoint directory",
+    #                     default="checkpoints")
+    # parser.add_argument("--board_dir", help="Tensorboard directory",
+    #                     default="tensorboard")
+    # parser.add_argument("--tboard_every", type=int, default=10,
+    #                     help="Write to tensorboard every N episodes")
+    # args = parser.parse_args()
                                   
-    train(args.num_episodes, args.save_every, args.checkpoint_dir,
-          args.board_dir, args.tboard_every)
-
+    # train(args.num_episodes, args.save_every, args.checkpoint_dir,
+    #       args.board_dir, args.tboard_every)
+    pol = train(num_episodes=5, 
+          save_every=100, 
+          checkpoint_dir="checkpoints0",
+          tensorboard_dir="tensorboard0",
+          tboard_every=10,
+          find_target_prop = 0.5
+          )
